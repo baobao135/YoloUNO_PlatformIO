@@ -111,6 +111,7 @@ void TaskWifiConnetion(void *pvParameters) {
   if (!reconnect()) {
     return;
   }
+  vTaskDelay(1000);
 }
 void TaskThingsBoardConnection(void *pvParameters) {
   if (!tb.connected()) {
@@ -143,6 +144,7 @@ void TaskThingsBoardConnection(void *pvParameters) {
       return;
     }
   }
+  vTaskDelay(2000);
 }
 
 
@@ -179,10 +181,16 @@ void TaskSendAttributeChanges(void *pvParameters) {
     attributesChanged = false;
     tb.sendAttributeData(LED_STATE_ATTR, digitalRead(LED_PIN));
   }
+  vTaskDelay(100);
 }
 
 void TaskLoop(void *pvParameters) {
-  tb.loop();
+  for (;;) {
+    if (tb.connected()) {
+      tb.loop();
+    }
+    vTaskDelay(10)
+  }
 }
 
 void setup() {
@@ -201,5 +209,4 @@ void setup() {
   xTaskCreate(TaskLoop, "ThingsBoard Loop Task", 2048, NULL, 2, NULL);
 }
 
-void loop() {
-}
+void loop() {}
