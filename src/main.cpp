@@ -3,17 +3,27 @@
 
 
 void TaskLEDControl(void *pvParameters) {
-  pinMode(GPIO_NUM_48, OUTPUT); // Initialize LED pin
-  int ledState = 0;
-  while(1) {
-    
-    if (ledState == 0) {
-      digitalWrite(GPIO_NUM_48, HIGH); // Turn ON LED
-    } else {
-      digitalWrite(GPIO_NUM_48, LOW); // Turn OFF LED
+  pinMode(GPIO_NUM_48, OUTPUT);
+
+  bool pattern = false;
+
+  while (1) {
+
+    if (!pattern) {
+      digitalWrite(GPIO_NUM_48, HIGH);
+      vTaskDelay(pdMS_TO_TICKS(1000));
+
+      digitalWrite(GPIO_NUM_48, LOW);
+      vTaskDelay(pdMS_TO_TICKS(3000));
+    } 
+    else {
+      digitalWrite(GPIO_NUM_48, HIGH);
+      vTaskDelay(pdMS_TO_TICKS(3000));
+
+      digitalWrite(GPIO_NUM_48, LOW);
+      vTaskDelay(pdMS_TO_TICKS(1000));
     }
-    ledState = 1 - ledState;
-    vTaskDelay(2000);
+    pattern = !pattern;
   }
 }
 
