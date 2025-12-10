@@ -107,25 +107,12 @@ const bool reconnect() {
   return true;
 }
 
-
-void setup() {
-  Serial.begin(SERIAL_DEBUG_BAUD);
-  pinMode(LED_PIN, OUTPUT);
-  delay(1000);
-  InitWiFi();
-
-  Wire.begin(SDA_PIN, SCL_PIN);
-  dht20.begin();
-  
-}
-
-void loop() {
-  delay(10);
-
+void TaskWifiConnetion(void *pvParameters) {
   if (!reconnect()) {
     return;
   }
-
+}
+void TaskThingsBoardConnection(void *pvParameters) {
   if (!tb.connected()) {
     Serial.print("Connecting to: ");
     Serial.print(THINGSBOARD_SERVER);
@@ -156,46 +143,63 @@ void loop() {
       return;
     }
   }
+}
 
+
+void TaskSendTelematry(void *pvParameters) {
+  dht20.read();
+    
+  float temperature = dht20.getTemperature();
+  float humidity = dht20.getHumidity();
+
+  if (isnan(temperature) || isnan(humidity)) {
+    Serial.println("Failed to read from DHT20 sensor!");
+  } else {
+    Serial.print("Temperature: ");
+    Serial.print(temperature);
+    Serial.print(" °C, Humidity: ");
+    Serial.print(humidity);
+    Serial.println(" %");
+
+    tb.sendTelemetryData("temperature", temperature);
+    tb.sendTelemetryData("humidity", humidity);
+  }
+
+  tb.sendAttributeData("rssi", WiFi.RSSI());
+  tb.sendAttributeData("channel", WiFi.channel());
+  tb.sendAttributeData("bssid", WiFi.BSSIDstr().c_str());
+  tb.sendAttributeData("localIp", WiFi.localIP().toString().c_str());
+  tb.sendAttributeData("ssid", WiFi.SSID().c_str());
+
+  vTaskDelay(5000);
+}
+
+void TaskSendAttributeChanges(void *pvParameters) {
   if (attributesChanged) {
     attributesChanged = false;
     tb.sendAttributeData(LED_STATE_ATTR, digitalRead(LED_PIN));
   }
+}
 
-  // if (ledMode == 1 && millis() - previousStateChange > blinkingInterval) {
-  //   previousStateChange = millis();
-  //   digitalWrite(LED_PIN, !digitalRead(LED_PIN));
-  //   Serial.print("LED state changed to: ");
-  //   Serial.println(!digitalRead(LED_PIN));
-  // }
-
-  if (millis() - previousDataSend > telemetrySendInterval) {
-    previousDataSend = millis();
-
-    dht20.read();
-    
-    float temperature = dht20.getTemperature();
-    float humidity = dht20.getHumidity();
-
-    if (isnan(temperature) || isnan(humidity)) {
-      Serial.println("Failed to read from DHT20 sensor!");
-    } else {
-      Serial.print("Temperature: ");
-      Serial.print(temperature);
-      Serial.print(" °C, Humidity: ");
-      Serial.print(humidity);
-      Serial.println(" %");
-
-      tb.sendTelemetryData("temperature", temperature);
-      tb.sendTelemetryData("humidity", humidity);
-    }
-
-    tb.sendAttributeData("rssi", WiFi.RSSI());
-    tb.sendAttributeData("channel", WiFi.channel());
-    tb.sendAttributeData("bssid", WiFi.BSSIDstr().c_str());
-    tb.sendAttributeData("localIp", WiFi.localIP().toString().c_str());
-    tb.sendAttributeData("ssid", WiFi.SSID().c_str());
-  }
-
+void TaskLoop(void *pvParameters) {
   tb.loop();
+}
+
+void setup() {
+  Serial.begin(SERIAL_DEBUG_BAUD);
+  pinMode(LED_PIN, OUTPUT);
+  delay(1000);
+  InitWiFi();
+
+  Wire.begin(SDA_PIN, SCL_PIN);
+  dht20.begin();
+  
+  xTaskCreate(TaskWifiConnetion, "WiFi Connection Task", 1024, NULL, 2, NULL);
+  xTaskCreate(TaskThingsBoardConnection, "ThingsBoard Connection Task", 4096, NULL, 2, NULL);
+  xTaskCreate(TaskSendTelematry, "Send Telemetry Task", 4096, NULL, 2, NULL);     
+  xTaskCreate(TaskSendAttributeChanges, "Send Attribute Changes Task", 2048, NULL, 2, NULL);
+  xTaskCreate(TaskLoop, "ThingsBoard Loop Task", 2048, NULL, 2, NULL);
+}
+
+void loop() {
 }
