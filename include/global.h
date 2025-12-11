@@ -9,6 +9,13 @@
 extern float glob_temperature;
 extern float glob_humidity;
 
+typedef struct
+{
+    float temperature;
+    float humidity;
+} Data_Dht20;
+
+extern Data_Dht20 data;
 
 extern String ssid;
 extern String password;
@@ -19,4 +26,8 @@ extern boolean isWifiConnected;
 
 extern boolean isWifiConnected;
 extern SemaphoreHandle_t xBinarySemaphoreInternet;
+extern SemaphoreHandle_t xSemaphoreLed;
+extern SemaphoreHandle_t xSemaphoreNeo;
+extern QueueHandle_t xQueueData;
+
 #endif

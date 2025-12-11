@@ -23,8 +23,13 @@ void temp_humi_monitor(void *pvParameters){
             temperature = humidity = -1;
         }
 
-        glob_temperature = temperature;
-        glob_humidity    = humidity;
+        data.temperature = temperature;
+        data.humidity    = humidity;
+
+        xQueueSend(xQueueData, &data, portMAX_DELAY);
+        xSemaphoreGive(xSemaphoreLed);
+        xSemaphoreGive(xSemaphoreNeo);
+
 
         lcd.clear();
         lcd.setCursor(0, 0);
