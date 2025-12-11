@@ -1,12 +1,26 @@
 #include "led_blinky.h"
+#include "global.h"
 
-void led_blinky(void *pvParameters){
-    pinMode(LED_GPIO, OUTPUT);
-  
-  while(1) {                        
-    digitalWrite(LED_GPIO, HIGH);  // turn the LED ON
-    vTaskDelay(1000);
-    digitalWrite(LED_GPIO, LOW);  // turn the LED OFF
-    vTaskDelay(1000);
+void led_blinky(void *pvParameters) {
+  pinMode(LED_GPIO, OUTPUT);
+
+  while (1) {
+    int delay_ms;
+    
+    if (glob_temperature < 25.0) {
+      delay_ms = 1500;      
+    }
+    else if (glob_temperature < 30.0) {
+      delay_ms = 700;
+    }
+    else {
+      delay_ms = 200;
+    }
+
+    digitalWrite(LED_GPIO, HIGH);
+    vTaskDelay(delay_ms / portTICK_PERIOD_MS);
+
+    digitalWrite(LED_GPIO, LOW);
+    vTaskDelay(delay_ms / portTICK_PERIOD_MS);
   }
 }
