@@ -189,7 +189,7 @@ void TaskLoop(void *pvParameters) {
     if (tb.connected()) {
       tb.loop();
     }
-    vTaskDelay(10)
+    vTaskDelay(10);
   }
 }
 
