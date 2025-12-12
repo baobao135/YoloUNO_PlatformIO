@@ -28,8 +28,8 @@ String mainPage() {
     <title>ESP32 Dashboard</title>
     <style>
       :root{
-        --orange1:#ff6a00; --orange2:#ff7f11;
-        --blue1:#0057c2;   --blue2:#0076ff;
+        --orange1:#ffffff; --orange2:#ff7f11;
+        --blue1:#ffffff;   --blue2:#0076ff;
         --card:#0e4770;    --bg:#f2f5f9;
         --btn-red:#ff4d4f; --btn-dark:#2e2f36;
         --white:#ffffff;   --muted:#9fb3c8;
@@ -292,8 +292,8 @@ String settingsPage() {
   <title>Settings</title>
   <style>
     :root{
-      --orange1:#ff6a00; --orange2:#ff7f11;
-      --blue1:#0057c2;   --blue2:#0076ff;
+      --orange1:#ffffff; --orange2:#ff7f11;
+      --blue1:#ffffff;   --blue2:#0076ff;
       --bg:#f2f5f9;      --card:#ffffff;
       --text:#0f1b2d;    --muted:#6b7a90;
       --primary:#ff4d4f; --dark:#2e2f36;
