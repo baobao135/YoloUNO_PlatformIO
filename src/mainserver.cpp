@@ -14,8 +14,8 @@ unsigned long connect_start_ms = 0;
 bool connecting = false;
 
 String mainPage() {
-  float temperature = glob_temperature;
-  float humidity    = glob_humidity; // nếu bạn chưa có biến này, giữ nguyên glob_temperature
+  float temperature = data.temperature;
+  float humidity    = data.humidity; // nếu bạn chưa có biến này, giữ nguyên glob_temperature
   String led1 = led1_state ? "ON" : "OFF";
   String led2 = led2_state ? "ON" : "OFF";
 
@@ -537,8 +537,8 @@ void handleToggle() {
 }
 
 void handleSensors() {
-  float t = glob_temperature;
-  float h = glob_humidity;
+  float t = data.temperature;
+  float h = data.humidity;
   String json = "{\"temp\":"+String(t)+",\"hum\":"+String(h)+"}";
   server.send(200, "application/json", json);
 }
@@ -581,7 +581,7 @@ void setupServer() {
 }
 
 void startAP() {
-  WiFi.mode(WIFI_AP_STA);
+  WiFi.mode(WIFI_AP);
   WiFi.softAP(ssid.c_str(), password.c_str());
   Serial.print("AP IP address: ");
   Serial.println(WiFi.softAPIP());
@@ -590,6 +590,7 @@ void startAP() {
 }
 
 void connectToWiFi() {
+  WiFi.mode(WIFI_STA);
   WiFi.begin(wifi_ssid.c_str(), wifi_password.c_str());
   Serial.print("Connecting to: ");
   Serial.print(wifi_ssid.c_str());
@@ -621,11 +622,10 @@ void main_server_task(void *pvParameters){
     // STA Mode
     if (connecting) {
       if (WiFi.status() == WL_CONNECTED) {
+        xSemaphoreGive(xBinarySemaphoreInternet);
         Serial.print("STA IP address: ");
         Serial.println(WiFi.localIP());
         isWifiConnected = true; //Internet access
-
-        xSemaphoreGive(xBinarySemaphoreInternet);
 
         isAPMode = false;
         connecting = false;

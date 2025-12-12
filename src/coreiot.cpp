@@ -2,7 +2,7 @@
 
 // ----------- CONFIGURE THESE! -----------
 const char* coreIOT_Server = "app.coreiot.io";  
-const char* coreIOT_Token = "g7drm1amhd3dchr379xu";   // Device Access Token
+const char* coreIOT_Token = "gue2bn3fn0mkyimv2vxm";   // Device Access Token
 const int   mqttPort = 1883;
 // ----------------------------------------
 
@@ -87,6 +87,7 @@ void setup_coreiot(){
 
   while(1){
     if (xSemaphoreTake(xBinarySemaphoreInternet, portMAX_DELAY)) {
+      Serial.print("OKKKK");
       break;
     }
     delay(500);
@@ -113,7 +114,7 @@ void coreiot_task(void *pvParameters){
         client.loop();
 
         // Sample payload, publish to 'v1/devices/me/telemetry'
-        String payload = "{\"temperature\":" + String(glob_temperature) +  ",\"humidity\":" + String(glob_humidity) + "}";
+        String payload = "{\"temperature\":" + String(data.temperature) +  ",\"humidity\":" + String(data.humidity) + "}";
         
         client.publish("v1/devices/me/telemetry", payload.c_str());
 
